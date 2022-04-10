@@ -9,6 +9,7 @@ const char* mqtt_server = "...";
 
 String Name = "SoilMoisture";
 String ID;
+#define MoistureSensorPin A0
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -102,10 +103,9 @@ void setup() {
 
   Serial.println(Name + "/" + ID);
   Serial.println("Posting to MQTT");
-  String MoistTopic = Name + "/" + ID + "/Moisture";
-  client.publish(MoistTopic.c_str(),"Value");
-  String VoltTopic = Name + "/" + ID + "/Voltage";
-  client.publish(VoltTopic.c_str(),"Value");
+  ReadMoisture();
+  
+
   Serial.println("going to sleep");
   digitalWrite(BUILTIN_LED,LOW);
   delay(500);
@@ -113,6 +113,22 @@ void setup() {
 }
 
 void loop() {
+}
+
+void ReadMoisture(){
+  int Sum = 0;
+  int Samples = 200; 
+  for (int x = 0; x < Samples; x++){
+    Sum = Sum + analogRead(MoistureSensorPin);
+  }
+  
+  float Average = Sum/Samples;
+
+  //Put in Fudge factor here
+  float MoisturePercentage = Average/1023 * 100;
+  
+  String MoistTopic = Name + "/" + ID + "/Moisture Percentage";
+  client.publish(MoistTopic.c_str(),String(MoisturePercentage).c_str());
 }
 
   
