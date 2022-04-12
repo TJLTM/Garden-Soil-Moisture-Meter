@@ -138,10 +138,10 @@ void ReadMoisture(){
   
   String MoistTopic = Name + "/" + ID + "/Moisture Percentage";
   client.publish(MoistTopic.c_str(),String(MoisturePercentage).c_str());
-  //Serial.println(MoistTopic + String(MoisturePercentage));
+  Serial.println(MoistTopic + "  " + String(MoisturePercentage));
   MoistTopic = Name + "/" + ID + "/Moisture Raw";
   client.publish(MoistTopic.c_str(),String(Average).c_str());
-  //Serial.println(MoistTopic + String(Average));
+  Serial.println(MoistTopic + "  " + String(Average));
 }
 
   
