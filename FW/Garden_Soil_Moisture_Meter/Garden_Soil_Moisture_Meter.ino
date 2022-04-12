@@ -12,6 +12,8 @@ String ID;
 #define MoistureSensorPin A0
 #define MoistureOutputPin 3
 
+const int MinsToSleep = 20;
+
 WiFiClient espClient;
 PubSubClient client(espClient);
 
@@ -110,7 +112,8 @@ void setup() {
   Serial.println("going to sleep");
   digitalWrite(BUILTIN_LED,LOW);
   delay(500);
-  ESP.deepSleep(30e6);
+  
+  ESP.deepSleep(MinsToSleep * 60000000);
 }
 
 void loop() {
