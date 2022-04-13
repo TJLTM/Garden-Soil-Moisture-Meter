@@ -12,7 +12,7 @@ String ID;
 #define MoistureSensorPin A0
 #define MoistureOutputPin 3
 
-const int MinsToSleep = 20;
+int MinsToSleep = 20 * 60000000;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -113,28 +113,31 @@ void setup() {
   digitalWrite(BUILTIN_LED,LOW);
   delay(500);
   
-  ESP.deepSleep(MinsToSleep * 60000000);
+  ESP.deepSleep(MinsToSleep);
 }
 
 void loop() {
 }
 
 void ReadMoisture(){
-  digitalWrite(MoistureOutputPin,HIGH);
-  delay(250);
+  digitalWrite(MoistureOutputPin,HIGH); //Turn on the Sensor 
+  delay(250); // 1/4 second for everything to stablize
   int Sum = 0;
   int Samples = 200; 
   for (int x = 0; x < Samples; x++){
     Sum = Sum + analogRead(MoistureSensorPin);
   }
-  digitalWrite(MoistureOutputPin,LOW);
   
-  int Average = Sum/Samples;
-  //600 > SITTING IN WATER 
-  // >50 separated by air
+  digitalWrite(MoistureOutputPin,LOW); //turn off the Sensor
+  int Average = Sum/Samples; 
 
-  //Put in Fudge factor here
-  int MoisturePercentage = map(Average, 0, 600, 0, 100);
+  /*
+   * Put in Fudge factor here for your own stuff i'm dealing with multiple 
+   * soil types and that changes how you would calibrate your readings 
+   * i'm just going to give the raw ADC and convert that to a Percentage 
+   */
+  
+  int MoisturePercentage = map(Average, 0, 1023, 0, 100);
   
   String MoistTopic = Name + "/" + ID + "/Moisture Percentage";
   client.publish(MoistTopic.c_str(),String(MoisturePercentage).c_str());
