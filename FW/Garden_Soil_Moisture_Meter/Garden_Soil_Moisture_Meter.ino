@@ -11,6 +11,7 @@ String Name = "SoilMoisture";
 String ID;
 #define MoistureSensorPin A0
 #define MoistureOutputPin 3
+#define OutputToCheckVotlage 2
 
 int MinsToSleep = 20 * 60000000;
 
@@ -92,6 +93,8 @@ void setup() {
     }
   }
   pinMode(MoistureOutputPin,OUTPUT);
+  pinMode(OutputToCheckVotlage,OUTPUT);
+  digitalWrite(OutputToCheckVotlage,LOW);
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
   digitalWrite(BUILTIN_LED,HIGH);
   delay(500);
@@ -108,6 +111,7 @@ void setup() {
   Serial.println(Name + "/" + ID);
   Serial.println("Posting to MQTT");
   ReadMoisture();
+  CompletelyStupidVoltageCheck();
   
   Serial.println("going to sleep");
   digitalWrite(BUILTIN_LED,LOW);
@@ -146,6 +150,25 @@ void ReadMoisture(){
   client.publish(MoistTopic.c_str(),String(Average).c_str());
   Serial.println(MoistTopic + "  " + String(Average));
 }
+
+void CompletelyStupidVoltageCheck(){
+  digitalWrite(OutputToCheckVotlage,HIGH);
+  delay(250); // 1/4 second for everything to stablize
+  int Sum = 0;
+  int Samples = 200; 
+  for (int x = 0; x < Samples; x++){
+    Sum = Sum + analogRead(MoistureSensorPin);
+  }
+  
+  digitalWrite(MoistureOutputPin,LOW); //turn off the Sensor
+  float Voltage = (Sum/Samples)*(3.3/1023); 
+  
+  String MoistTopic = Name + "/" + ID + "/Voltage";
+  client.publish(MoistTopic.c_str(),String(Voltage).c_str());
+  Serial.println(MoistTopic + "  " + String(Voltage));
+  digitalWrite(OutputToCheckVotlage,LOW);
+}
+
 
   
 
