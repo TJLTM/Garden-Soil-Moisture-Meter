@@ -9,18 +9,22 @@ const char* mqtt_server = "...";
 
 String Name = "SoilMoisture";
 String ID;
-#define MoistureSensorPin A0
-#define MoistureOutputPin 3
-#define OutputToCheckVotlage 2
+bool WifiConnected = false;
+#define MuxAddressPinS0 D1
+#define MuxAddressPinS1 D2
+#define MuxAddressPinS2 D3
+#define MuxAddressPinS3 D4
+#define MuxEnablePin D7
 
-int MinsToSleep = 20 * 60000000;
+int MinsToSleep = 15 * 60000000;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
 
 void setup_wifi() {
   delay(10);
-  // We start by connecting to a WiFi network
+  // We start by connecting to a WiFi network 
+  // Need to add timeout for this 
   Serial.println();
   Serial.print("Connecting to ");
   Serial.println(ssid);
@@ -49,32 +53,17 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.print((char)payload[i]);
   }
   Serial.println();
-
-  // Switch on the LED if an 1 was received as first character
-  if ((char)payload[0] == '1') {
-    digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
-    // but actually the LED is on; this is because
-    // it is active low on the ESP-01)
-  } else {
-    digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
-  }
-
 }
 
 void reconnect() {
   // Loop until we're reconnected
+  String ClientName = Name + ID;
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
-    // Create a random client ID
-    String clientId = "ESP8266Client-";
-    clientId += String(random(0xffff), HEX);
     // Attempt to connect
-    if (client.connect(clientId.c_str())) {
-      Serial.println("connected");
-      // Once connected, publish an announcement...
-      client.publish("outTopic", "hello world");
-      // ... and resubscribe
-      client.subscribe("inTopic");
+    if (client.connect(ClientName.c_str())) {
+      Serial.print("connected as ");
+      Serial.println(ClientName);
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -92,85 +81,162 @@ void setup() {
       ID.concat(MAC.charAt(x));
     }
   }
-  pinMode(MoistureOutputPin,OUTPUT);
-  pinMode(OutputToCheckVotlage,OUTPUT);
-  digitalWrite(OutputToCheckVotlage,LOW);
+
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
-  digitalWrite(BUILTIN_LED,HIGH);
+  digitalWrite(BUILTIN_LED, HIGH);
   delay(500);
   Serial.begin(115200);
   setup_wifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
+  if (WifiConnected == true) {
+    if (!client.connected()) {
+      reconnect();
+    }
+    client.loop();
 
-  if (!client.connected()) {
-    reconnect();
+    Serial.println(Name + "/" + ID);
+    Serial.println("Posting to MQTT");
+    for (int x = 1; x < 16; x++) {
+      SwitchMuxInputs(x);
+      delay(100);
+      ReadMoisture(x);
+    }
+
   }
-  client.loop();
+  Serial.println("going to sleep in 5 Seconds");
+  digitalWrite(BUILTIN_LED, LOW);
+  delay(5000);
 
-  Serial.println(Name + "/" + ID);
-  Serial.println("Posting to MQTT");
-  ReadMoisture();
-  CompletelyStupidVoltageCheck();
-  
-  Serial.println("going to sleep");
-  digitalWrite(BUILTIN_LED,LOW);
-  delay(500);
-  
   ESP.deepSleep(MinsToSleep);
 }
 
 void loop() {
 }
 
-void ReadMoisture(){
-  digitalWrite(MoistureOutputPin,HIGH); //Turn on the Sensor 
+void ReadMoisture(int InputNumber) {
   delay(250); // 1/4 second for everything to stablize
   int Sum = 0;
-  int Samples = 200; 
-  for (int x = 0; x < Samples; x++){
-    Sum = Sum + analogRead(MoistureSensorPin);
+  int Samples = 200;
+  for (int x = 0; x < Samples; x++) {
+    Sum = Sum + analogRead(A0);
+    delay(3); // delay to let the ADC settle before reading again.
   }
-  
-  digitalWrite(MoistureOutputPin,LOW); //turn off the Sensor
-  int Average = Sum/Samples; 
+
+  int Average = Sum / Samples;
 
   /*
-   * Put in Fudge factor here for your own stuff i'm dealing with multiple 
-   * soil types and that changes how you would calibrate your readings 
-   * i'm just going to give the raw ADC and convert that to a Percentage 
-   */
-  
-  int MoisturePercentage = map(Average, 0, 1023, 0, 100);
-  
-  String MoistTopic = Name + "/" + ID + "/Moisture Percentage";
-  client.publish(MoistTopic.c_str(),String(MoisturePercentage).c_str());
-  Serial.println(MoistTopic + "  " + String(MoisturePercentage));
-  MoistTopic = Name + "/" + ID + "/Moisture Raw";
-  client.publish(MoistTopic.c_str(),String(Average).c_str());
+     Put in Fudge factor here for your own stuff i'm dealing with multiple
+     soil types and that changes how you would calibrate your readings
+     i'm just going to give the raw ADC and convert that to a Percentage
+  */
+
+  String MoistTopic = Name + "/" + ID + "/Moisture Raw/" + String(InputNumber);
+  client.publish(MoistTopic.c_str(), String(Average).c_str());
   Serial.println(MoistTopic + "  " + String(Average));
 }
 
-void CompletelyStupidVoltageCheck(){
-  digitalWrite(OutputToCheckVotlage,HIGH);
-  delay(250); // 1/4 second for everything to stablize
-  int Sum = 0;
-  int Samples = 200; 
-  for (int x = 0; x < Samples; x++){
-    Sum = Sum + analogRead(MoistureSensorPin);
+void SwitchMuxInputs(int Number) {
+  digitalWrite(MuxEnablePin, HIGH);
+  switch (Number) {
+    case 0:
+      digitalWrite(MuxAddressPinS0, LOW);
+      digitalWrite(MuxAddressPinS1, LOW);
+      digitalWrite(MuxAddressPinS2, LOW);
+      digitalWrite(MuxAddressPinS3, LOW);
+      break;
+    case 1:
+      digitalWrite(MuxAddressPinS0, HIGH);
+      digitalWrite(MuxAddressPinS1, LOW);
+      digitalWrite(MuxAddressPinS2, LOW);
+      digitalWrite(MuxAddressPinS3, LOW);
+      break;
+    case 2:
+      digitalWrite(MuxAddressPinS0, LOW);
+      digitalWrite(MuxAddressPinS1, HIGH);
+      digitalWrite(MuxAddressPinS2, LOW);
+      digitalWrite(MuxAddressPinS3, LOW);
+      break;
+    case 3:
+      digitalWrite(MuxAddressPinS0, HIGH);
+      digitalWrite(MuxAddressPinS1, HIGH);
+      digitalWrite(MuxAddressPinS2, LOW);
+      digitalWrite(MuxAddressPinS3, LOW);
+      break;
+    case 4:
+      digitalWrite(MuxAddressPinS0, LOW);
+      digitalWrite(MuxAddressPinS1, LOW);
+      digitalWrite(MuxAddressPinS2, HIGH);
+      digitalWrite(MuxAddressPinS3, LOW);
+      break;
+    case 5:
+      digitalWrite(MuxAddressPinS0, HIGH);
+      digitalWrite(MuxAddressPinS1, LOW);
+      digitalWrite(MuxAddressPinS2, HIGH);
+      digitalWrite(MuxAddressPinS3, LOW);
+      break;
+    case 6:
+      digitalWrite(MuxAddressPinS0, LOW);
+      digitalWrite(MuxAddressPinS1, HIGH);
+      digitalWrite(MuxAddressPinS2, HIGH);
+      digitalWrite(MuxAddressPinS3, LOW);
+      break;
+    case 7:
+      digitalWrite(MuxAddressPinS0, HIGH);
+      digitalWrite(MuxAddressPinS1, HIGH);
+      digitalWrite(MuxAddressPinS2, HIGH);
+      digitalWrite(MuxAddressPinS3, LOW);
+      break;
+    case 8:
+      digitalWrite(MuxAddressPinS0, LOW);
+      digitalWrite(MuxAddressPinS1, LOW);
+      digitalWrite(MuxAddressPinS2, LOW);
+      digitalWrite(MuxAddressPinS3, HIGH);
+      break;
+    case 9:
+      digitalWrite(MuxAddressPinS0, HIGH);
+      digitalWrite(MuxAddressPinS1, LOW);
+      digitalWrite(MuxAddressPinS2, LOW);
+      digitalWrite(MuxAddressPinS3, HIGH);
+      break;
+    case 10:
+      digitalWrite(MuxAddressPinS0, LOW);
+      digitalWrite(MuxAddressPinS1, HIGH);
+      digitalWrite(MuxAddressPinS2, LOW);
+      digitalWrite(MuxAddressPinS3, HIGH);
+      break;
+    case 11:
+      digitalWrite(MuxAddressPinS0, HIGH);
+      digitalWrite(MuxAddressPinS1, HIGH);
+      digitalWrite(MuxAddressPinS2, LOW);
+      digitalWrite(MuxAddressPinS3, HIGH);
+      break;
+    case 12:
+      digitalWrite(MuxAddressPinS0, LOW);
+      digitalWrite(MuxAddressPinS1, LOW);
+      digitalWrite(MuxAddressPinS2, HIGH);
+      digitalWrite(MuxAddressPinS3, HIGH);
+      break;
+    case 13:
+      digitalWrite(MuxAddressPinS0, HIGH);
+      digitalWrite(MuxAddressPinS1, LOW);
+      digitalWrite(MuxAddressPinS2, HIGH);
+      digitalWrite(MuxAddressPinS3, HIGH);
+      break;
+    case 14:
+      digitalWrite(MuxAddressPinS0, LOW);
+      digitalWrite(MuxAddressPinS1, HIGH);
+      digitalWrite(MuxAddressPinS2, HIGH);
+      digitalWrite(MuxAddressPinS3, HIGH);
+      break;
+    case 15:
+      digitalWrite(MuxAddressPinS0, HIGH);
+      digitalWrite(MuxAddressPinS1, HIGH);
+      digitalWrite(MuxAddressPinS2, HIGH);
+      digitalWrite(MuxAddressPinS3, HIGH);
+      break;
+    default:
+      break;
   }
-  
-  digitalWrite(MoistureOutputPin,LOW); //turn off the Sensor
-  float Voltage = (Sum/Samples)*(3.3/1023); 
-  
-  String MoistTopic = Name + "/" + ID + "/Voltage";
-  client.publish(MoistTopic.c_str(),String(Voltage).c_str());
-  Serial.println(MoistTopic + "  " + String(Voltage));
-  digitalWrite(OutputToCheckVotlage,LOW);
+  digitalWrite(MuxEnablePin, LOW);
 }
-
-
-  
-
-
-  
