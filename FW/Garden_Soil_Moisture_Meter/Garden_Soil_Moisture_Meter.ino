@@ -9,7 +9,7 @@ const char* mqtt_server = "...";
 
 String Name = "SoilMoisture";
 String ID;
-bool WifiConnected = false;
+bool WifiConnected, MQTTConnected = false;
 #define MuxAddressPinS0 D1
 #define MuxAddressPinS1 D2
 #define MuxAddressPinS2 D3
@@ -23,8 +23,8 @@ PubSubClient client(espClient);
 
 void setup_wifi() {
   delay(10);
-  // We start by connecting to a WiFi network 
-  // Need to add timeout for this 
+  // We start by connecting to a WiFi network
+  // Need to add timeout for this
   Serial.println();
   Serial.print("Connecting to ");
   Serial.println(ssid);
@@ -32,17 +32,27 @@ void setup_wifi() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
 
-  while (WiFi.status() != WL_CONNECTED) {
+  int StartTime = millis();
+  int CurrentTime = millis();
+  while (WiFi.status() != WL_CONNECTED && abs(StartTime - CurrentTime) < 60000) {
     delay(500);
     Serial.print(".");
   }
 
   randomSeed(micros());
 
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("");
+    Serial.println("WiFi connected");
+    Serial.println("IP address: ");
+    Serial.println(WiFi.localIP());
+    WifiConnected = true;
+  }
+  else {
+    Serial.println("");
+    Serial.println("Can no connect to WiFi");
+  }
+
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -56,20 +66,23 @@ void callback(char* topic, byte* payload, unsigned int length) {
 }
 
 void reconnect() {
-  // Loop until we're reconnected
   String ClientName = Name + ID;
-  while (!client.connected()) {
+  int MQttReconnect = 0;
+  while (!client.connected() && MQttReconnect < 5) {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
     if (client.connect(ClientName.c_str())) {
       Serial.print("connected as ");
       Serial.println(ClientName);
+      MQTTConnected = true;
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
       Serial.println(" try again in 5 seconds");
       // Wait 5 seconds before retrying
       delay(5000);
+      MQttReconnect += 1;
+      MQTTConnected = false;
     }
   }
 }
@@ -95,23 +108,51 @@ void setup() {
     }
     client.loop();
 
-    Serial.println(Name + "/" + ID);
-    Serial.println("Posting to MQTT");
-    for (int x = 1; x < 16; x++) {
-      SwitchMuxInputs(x);
-      delay(100);
-      ReadMoisture(x);
+    if (MQTTConnected == true) {
+      Serial.println(Name + "/" + ID);
+      Serial.println("Posting to MQTT");
+      for (int x = 1; x < 16; x++) {
+        SwitchMuxInputs(x);
+        delay(100);
+        ReadMoisture(x);
+      }
+      ReadBatteryVoltage();
     }
-
+    else {
+      Serial.println("Could not connect to MQTT Server");
+    }
   }
+
   Serial.println("going to sleep in 5 Seconds");
   digitalWrite(BUILTIN_LED, LOW);
   delay(5000);
-
-  ESP.deepSleep(MinsToSleep);
+  if (WifiConnected == true) {
+    ESP.deepSleep(MinsToSleep);
+  }
+  else {
+    ESP.deepSleep(2.5 * 60000000); //try again in 2:30
+  }
 }
 
 void loop() {
+}
+
+void ReadBatteryVoltage() {
+  SwitchMuxInputs(0);
+  delay(250); // 1/4 second for everything to stablize
+  int Sum = 0;
+  int Samples = 200;
+  for (int x = 0; x < Samples; x++) {
+    Sum = Sum + analogRead(A0);
+    delay(3); // delay to let the ADC settle before reading again.
+  }
+
+  int Average = Sum / Samples;
+
+  String MoistTopic = Name + "/" + ID + "/Voltage/";
+  client.publish(MoistTopic.c_str(), String(Average).c_str());
+  Serial.println(MoistTopic + "  " + String(Average));
+
 }
 
 void ReadMoisture(int InputNumber) {
@@ -124,12 +165,6 @@ void ReadMoisture(int InputNumber) {
   }
 
   int Average = Sum / Samples;
-
-  /*
-     Put in Fudge factor here for your own stuff i'm dealing with multiple
-     soil types and that changes how you would calibrate your readings
-     i'm just going to give the raw ADC and convert that to a Percentage
-  */
 
   String MoistTopic = Name + "/" + ID + "/Moisture Raw/" + String(InputNumber);
   client.publish(MoistTopic.c_str(), String(Average).c_str());
