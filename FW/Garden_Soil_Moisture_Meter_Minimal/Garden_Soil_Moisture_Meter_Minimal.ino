@@ -91,6 +91,7 @@ void setup() {
   }
 
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
+  pinMode(3,OUTPUT);
   digitalWrite(BUILTIN_LED, HIGH);
   delay(500);
   Serial.begin(115200);
@@ -128,6 +129,7 @@ void loop() {
 }
 
 void ReadMoisture() {
+  digitalWrite(3,HIGH);
   delay(250); // 1/4 second for everything to stablize
   int Sum = 0;
   int Samples = 200;
@@ -135,6 +137,7 @@ void ReadMoisture() {
     Sum = Sum + analogRead(A0);
     delay(3); // delay to let the ADC settle before reading again.
   }
+  digitalWrite(3,LOW);
 
   int Average = Sum / Samples;
 
