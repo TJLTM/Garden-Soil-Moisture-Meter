@@ -109,7 +109,7 @@
   (net 32 "3B")
   (net 33 "2B")
   (net 34 "1B")
-  (net 35 "Net-(IC2-Pad9)")
+  (net 35 "Net-(IC1-Pad9)")
   (net 36 "15B")
   (net 37 "14B")
   (net 38 "13B")
@@ -136,7 +136,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical" (layer "F.Cu")
     (tedit 5AE5139B) (tstamp 3655cdd3-c10f-46a7-9a27-0a2413d9f145)
-    (at 89.78908 52.826146)
+    (at 152.742764 86.023614)
     (descr "Resistor, Axial_DIN0207 series, Axial, Vertical, pin pitch=2.54mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Vertical pin pitch 2.54mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "Garden-Soil-MoistureSensor.kicad_sch")
@@ -249,7 +249,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical" (layer "F.Cu")
     (tedit 5AE5139B) (tstamp 457ec5ab-7e10-4307-a114-d522014be0b0)
-    (at 85.654047 27.869494)
+    (at 152.742764 75.462029)
     (descr "Resistor, Axial_DIN0207 series, Axial, Vertical, pin pitch=2.54mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Vertical pin pitch 2.54mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "Garden-Soil-MoistureSensor.kicad_sch")
@@ -289,7 +289,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical" (layer "F.Cu")
     (tedit 5AE5139B) (tstamp 5f960da2-0755-467e-a739-bb26e7c6e321)
-    (at 85.654047 31.919494)
+    (at 152.742764 70.181237)
     (descr "Resistor, Axial_DIN0207 series, Axial, Vertical, pin pitch=2.54mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Vertical pin pitch 2.54mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "Garden-Soil-MoistureSensor.kicad_sch")
@@ -329,7 +329,7 @@
 
   (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical" (layer "F.Cu")
     (tedit 5AE5139B) (tstamp 79187177-5025-4e6d-aee1-4b4aef75822e)
-    (at 95.92908 52.826146)
+    (at 152.742764 80.742821)
     (descr "Resistor, Axial_DIN0207 series, Axial, Vertical, pin pitch=2.54mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
     (tags "Resistor Axial_DIN0207 series Axial Vertical pin pitch 2.54mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
     (property "Sheetfile" "Garden-Soil-MoistureSensor.kicad_sch")
@@ -823,7 +823,7 @@
     (pad "8" smd rect locked (at -4.725 1.905 90) (size 0.65 1.95) (layers "F.Cu" "F.Paste" "F.Mask")
       (net 34 "1B") (pinfunction "I1") (pintype "passive") (tstamp c87e9fd6-8c8c-4767-b349-a6c6db93ce92))
     (pad "9" smd rect locked (at -4.725 3.175 90) (size 0.65 1.95) (layers "F.Cu" "F.Paste" "F.Mask")
-      (net 35 "Net-(IC2-Pad9)") (pinfunction "I0") (pintype "passive") (tstamp c156aa15-a4b2-486d-b511-742f24a5aee9))
+      (net 35 "Net-(IC1-Pad9)") (pinfunction "I0") (pintype "passive") (tstamp c156aa15-a4b2-486d-b511-742f24a5aee9))
     (pad "10" smd rect locked (at -4.725 4.445 90) (size 0.65 1.95) (layers "F.Cu" "F.Paste" "F.Mask")
       (net 15 "D1") (pinfunction "S0") (pintype "passive") (tstamp be9df3b0-898f-43eb-9903-80f432ea43e0))
     (pad "11" smd rect locked (at -4.725 5.715 90) (size 0.65 1.95) (layers "F.Cu" "F.Paste" "F.Mask")
@@ -863,7 +863,7 @@
 
   (footprint "Capacitor_THT:C_Disc_D6.0mm_W2.5mm_P5.00mm" (layer "F.Cu")
     (tedit 5AE50EF0) (tstamp efab7f30-6799-4764-abbc-40c0ebdf0db8)
-    (at 81.18908 52.826146)
+    (at 151.287764 65.215488)
     (descr "C, Disc series, Radial, pin pitch=5.00mm, , diameter*width=6*2.5mm^2, Capacitor, http://cdn-reichelt.de/documents/datenblatt/B300/DS_KERKO_TC.pdf")
     (tags "C Disc series Radial pin pitch 5.00mm  diameter 6mm width 2.5mm Capacitor")
     (property "Sheetfile" "Garden-Soil-MoistureSensor.kicad_sch")
@@ -965,7 +965,7 @@
     (pad "8" smd rect locked (at -4.725 1.905 90) (size 0.65 1.95) (layers "F.Cu" "F.Paste" "F.Mask")
       (net 50 "1A") (pinfunction "I1") (pintype "passive") (tstamp bb4b290a-3ff2-43b4-b60f-6bde0d87fa8e))
     (pad "9" smd rect locked (at -4.725 3.175 90) (size 0.65 1.95) (layers "F.Cu" "F.Paste" "F.Mask")
-      (net 35 "Net-(IC2-Pad9)") (pinfunction "I0") (pintype "passive") (tstamp 66225c18-3a77-40df-8891-9785bbb6f8d0))
+      (net 35 "Net-(IC1-Pad9)") (pinfunction "I0") (pintype "passive") (tstamp 66225c18-3a77-40df-8891-9785bbb6f8d0))
     (pad "10" smd rect locked (at -4.725 4.445 90) (size 0.65 1.95) (layers "F.Cu" "F.Paste" "F.Mask")
       (net 15 "D1") (pinfunction "S0") (pintype "passive") (tstamp 587da466-f00f-4548-82fa-a68d6177d914))
     (pad "11" smd rect locked (at -4.725 5.715 90) (size 0.65 1.95) (layers "F.Cu" "F.Paste" "F.Mask")
@@ -1002,6 +1002,16 @@
       (rotate (xyz 0 0 0))
     )
   )
+
+  (gr_line (start 114.3 45.72) (end 114.3 138.475913) (layer "Edge.Cuts") (width 0.1) (tstamp 4b308f82-5bc1-4d5d-abeb-df3a70f5e2de))
+  (gr_line (start 182.88 45.72) (end 114.3 45.72) (layer "Edge.Cuts") (width 0.1) (tstamp 71968fb3-bc47-451a-b92d-2f7a075d49b9))
+  (gr_line (start 114.3 138.43) (end 182.88 138.43) (layer "Edge.Cuts") (width 0.1) (tstamp be018165-e64e-479e-b052-7d78eaa03fff))
+  (gr_line (start 182.88 138.48139) (end 182.88 45.754492) (layer "Edge.Cuts") (width 0.1) (tstamp ca1af6e0-b911-4719-a936-e41d586110b5))
+
+  (via (at 117.475 49.53) (size 3.8736) (drill 3.175) (layers "F.Cu" "B.Cu") (free) (net 10) (tstamp 074815e6-91a0-4090-a290-29b93ecec84f))
+  (via (at 117.475 134.62) (size 3.8736) (drill 3.175) (layers "F.Cu" "B.Cu") (free) (net 10) (tstamp 48573f01-35ca-4940-a0fb-37a7195d04a8))
+  (via (at 180.34 49.53) (size 3.8736) (drill 3.175) (layers "F.Cu" "B.Cu") (free) (net 10) (tstamp 4c2296af-32ad-43f5-a2a0-7acff7a8cb73))
+  (via (at 180.34 134.62) (size 3.8736) (drill 3.175) (layers "F.Cu" "B.Cu") (free) (net 10) (tstamp 633aafcb-e7f5-4f49-b90e-2af365a07e52))
 
   (group "" (id 31916c38-883f-4186-ab10-8bd6d91959f5)
     (members
